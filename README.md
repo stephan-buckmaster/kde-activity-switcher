@@ -1,118 +1,147 @@
-# KDE Activity Switcher
+# KDE Activity Hooks
 
-Simple scripts to manage KDE Plasma activities from the command line.
+Hook management tools for KDE Plasma Activities. Auto-launch Firefox with dedicated profiles, terminals, and other apps when switching activities.
+
+## What This Does
+
+KDE Activities already has a built-in hook system at `~/.local/share/kactivitymanagerd/activities/<uuid>/activated`, but it's not well-documented and requires working with UUIDs. This tool makes it easy to set up hooks using activity names.
+
+## Quick Start
+
+```bash
+# 1. Create an activity (using KDE's official tool)
+kactivities-cli --create-activity "Work"
+
+# 2. Set up Firefox hook for that activity
+./setup-firefox-hook.sh "Work"
+
+# 3. Switch to the activity
+kactivities-cli --set-current-activity "Work"
+
+# Firefox and terminal launch automatically!
+# If Firefox profile doesn't exist, Profile Manager opens automatically
+```
 
 ## Scripts
 
-### create-activity.sh
-Creates a new KDE activity, optionally with a custom setup script.
-
-**Usage:**
-```bash
-# Create a basic activity
-./create-activity.sh "Work"
-
-# Create an activity with Firefox auto-launch setup
-./create-activity.sh "Work" custom=./setup-firefox-hook.sh
-```
-
-The `custom=` parameter accepts a path to any setup script. The script receives the activity name as an argument and can set up hooks or other configuration.
-
-### switch-activity.sh
-Switch between existing activities. Automatically runs hook scripts to launch apps when switching.
-
-**Usage:**
-```bash
-# Interactive mode - shows numbered list with quit option
-./switch-activity.sh
-
-# Direct mode - switch by name
-./switch-activity.sh "Work"
-```
-
-In interactive mode, shows a numbered list of all activities with a quit option. You can also pass the activity name directly as an argument to switch immediately. If a hook script exists for that activity, it will run automatically.
-
 ### setup-firefox-hook.sh
-Setup script that creates a hook for launching Firefox with a dedicated profile.
+
+Creates a hook that auto-launches Firefox with a dedicated profile and a terminal when you switch to an activity.
 
 **Usage:**
 ```bash
-# Typically used with create-activity.sh
-./create-activity.sh "Work" custom=./setup-firefox-hook.sh
-
-# Can also be run standalone
 ./setup-firefox-hook.sh "Work"
 ```
 
-This creates a hook script that launches Firefox (with profile "work") and a terminal when switching to the activity.
+This:
+1. Looks up the activity UUID from the name
+2. Creates `~/.local/share/kactivitymanagerd/activities/<uuid>/activated`
+3. Generates a hook that launches Firefox (profile "work") and konsole
+4. Detects if Firefox profile exists; if not, opens Profile Manager
+
+**Firefox Profile Naming:** Activity name is converted to lowercase (e.g., "Work" → "work" profile)
+
+### example-hook.sh
+
+Template showing how to create custom hooks manually. Use this as a reference if you want to:
+- Launch different applications
+- Create hooks for deactivated/started/stopped events
+- Customize the hook behavior
+
+## Managing Activities
+
+Use KDE's official `kactivities-cli` tool for activity management:
+
+```bash
+# List all activities
+kactivities-cli --list-activities
+
+# Create a new activity
+kactivities-cli --create-activity "Research"
+
+# Switch to an activity (by name)
+kactivities-cli --set-current-activity "Research"
+
+# Delete an activity
+kactivities-cli --remove-activity <uuid>
+
+# Cycle through activities
+kactivities-cli --next-activity
+kactivities-cli --previous-activity
+
+# Get help
+kactivities-cli --help
+```
+
+## How the Hook System Works
+
+KDE's Activity Manager automatically runs scripts in these locations:
+
+```
+~/.local/share/kactivitymanagerd/activities/<activity-uuid>/
+├── activated      - Runs when switching TO this activity
+├── deactivated    - Runs when switching AWAY from this activity
+├── started        - Runs when activity starts
+└── stopped        - Runs when activity stops
+```
+
+Our `setup-firefox-hook.sh` creates the `activated` hook for you, using the activity name to look up the UUID.
 
 ## Installation
 
-1. Clone this repo
-2. Make scripts executable:
 ```bash
-chmod +x create-activity.sh switch-activity.sh setup-firefox-hook.sh
+# Clone this repo
+git clone <repo-url>
+cd kde-activity-switcher
+
+# Make scripts executable
+chmod +x setup-firefox-hook.sh
 ```
 
-3. Optionally, add to your PATH or create symlinks in `~/bin/`
+Optionally, add to your PATH or create symlinks in `~/bin/`
 
-## Auto-launching Apps with Hook Scripts
+## Why Firefox Works Better for Activities
 
-`switch-activity.sh` automatically runs hook scripts when switching to an activity. This lets you launch Firefox (with specific profiles), terminals, and other apps automatically.
-
-### Quick Setup with setup-firefox-hook.sh
-
-The easiest way to set up Firefox auto-launching:
-
-1. Create an activity with the Firefox setup script:
-```bash
-./create-activity.sh "Work" custom=./setup-firefox-hook.sh
-```
-
-2. Create the Firefox profile when prompted:
-```bash
-firefox -ProfileManager -no-remote
-# Create profile named "work" (lowercase of activity name)
-```
-
-3. Switch to your activity:
-```bash
-./switch-activity.sh
-# Select "Work" - Firefox and terminal launch automatically!
-```
-
-### Manual Hook Setup
-
-You can also create hooks manually for more control:
-
-1. Create the hooks directory:
-```bash
-mkdir -p ~/.config/kde-activities/hooks
-```
-
-2. Copy the example hook and customize it:
-```bash
-cp example-hook.sh ~/.config/kde-activities/hooks/Work.sh
-chmod +x ~/.config/kde-activities/hooks/Work.sh
-```
-
-3. Edit the hook script to match your needs
-
-### How It Works
-
-- Hook scripts are named after the activity: `<ActivityName>.sh`
-- The script runs automatically when you switch to that activity
-- Apps only launch if they're not already running
-- Each activity can have different apps/profiles
-
-### Why Firefox Works Better
-
-Firefox works better than Chrome for activity isolation because:
-- Firefox allows multiple instances with different profiles using `-P <profile> -no-remote`
+Firefox allows multiple instances with different profiles using `-P <profile> -no-remote`:
 - Each profile's windows stay in their respective activity
-- Chrome prefers a single process managing all windows
+- Complete isolation between activity contexts
+- Chrome/Chromium resist this because they prefer a single process
+
+## Advanced: Manual Hook Setup
+
+If you want full control:
+
+```bash
+# 1. Find your activity UUID
+kactivities-cli --list-activities
+
+# 2. Create hook directory
+mkdir -p ~/.local/share/kactivitymanagerd/activities/<uuid>
+
+# 3. Create your custom hook
+cp example-hook.sh ~/.local/share/kactivitymanagerd/activities/<uuid>/activated
+chmod +x ~/.local/share/kactivitymanagerd/activities/<uuid>/activated
+
+# 4. Edit to customize
+nano ~/.local/share/kactivitymanagerd/activities/<uuid>/activated
+```
 
 ## Requirements
 
 - KDE Plasma 5.x or 6.x
-- `qdbus` (usually pre-installed with KDE)
+- `kactivities-cli` (from kactivities-bin package)
+- Firefox (if using setup-firefox-hook.sh)
+
+## Cleanup
+
+To remove hooks:
+```bash
+# Find activity UUID
+kactivities-cli --list-activities
+
+# Remove hook directory
+rm -rf ~/.local/share/kactivitymanagerd/activities/<uuid>
+
+# Or delete the entire activity
+kactivities-cli --remove-activity <uuid>
+```

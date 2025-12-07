@@ -23,7 +23,7 @@ if [ -n "$ACTIVITY_NAME_ARG" ]; then
         echo "Error: Activity '$ACTIVITY_NAME_ARG' not found!"
         echo ""
         echo "Available activities:"
-        echo "$ACTIVITY_LIST" | sed -E 's/^\[[^]]+\] [^ ]+ (.*) \([^)]*\)$/  - \1/'
+        echo "$ACTIVITY_LIST" | sed 's/^\[[^]]*\] [^ ]* /  - /' | sed 's/ ([^)]*)$//'
         exit 1
     fi
 else
@@ -37,7 +37,7 @@ else
     while IFS= read -r line; do
         # Parse: [STATUS] UUID Name (extra)
         STATUS=$(echo "$line" | awk '{print $1}' | tr -d '[]')
-        NAME=$(echo "$line" | sed -E 's/^\[[^]]+\] [^ ]+ (.*) \([^)]*\)$/\1/')
+        NAME=$(echo "$line" | sed 's/^\[[^]]*\] [^ ]* //' | sed 's/ ([^)]*)$//')
 
         if [ "$STATUS" = "CURRENT" ]; then
             echo "$i) $NAME (current)"

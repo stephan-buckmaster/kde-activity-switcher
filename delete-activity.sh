@@ -20,7 +20,7 @@ ACTIVITY_UUID=""
 while IFS= read -r line; do
     # Parse line format: [STATUS] UUID Name (extra)
     # Extract name by removing [STATUS] UUID at start and (extra) at end
-    NAME=$(echo "$line" | sed -E 's/^\[[^]]+\] [^ ]+ (.*) \([^)]*\)$/\1/')
+    NAME=$(echo "$line" | sed 's/^\[[^]]*\] [^ ]* //' | sed 's/ ([^)]*)$//')
     if [ "$NAME" = "$ACTIVITY_NAME" ]; then
         ACTIVITY_UUID=$(echo "$line" | awk '{print $2}')
         break
@@ -31,7 +31,7 @@ if [ -z "$ACTIVITY_UUID" ]; then
     echo "Error: Activity '$ACTIVITY_NAME' not found!"
     echo ""
     echo "Available activities:"
-    echo "$ACTIVITY_LIST" | sed -E 's/^\[[^]]+\] [^ ]+ (.*) \([^)]*\)$/  - \1/'
+    echo "$ACTIVITY_LIST" | sed 's/^\[[^]]*\] [^ ]* /  - /' | sed 's/ ([^)]*)$//'
     exit 1
 fi
 

@@ -24,7 +24,7 @@ if ! echo "$ACTIVITY_LIST" | grep -q " $ACTIVITY_NAME "; then
     echo "Error: Activity '$ACTIVITY_NAME' not found!"
     echo ""
     echo "Available activities:"
-    echo "$ACTIVITY_LIST" | sed -E 's/^\[[^]]+\] [^ ]+ (.*) \([^)]*\)$/  - \1/'
+    echo "$ACTIVITY_LIST" | sed 's/^\[[^]]*\] [^ ]* /  - /' | sed 's/ ([^)]*)$//'
     echo ""
     echo "Create it first with:"
     echo "  ./create-activity.sh \"$ACTIVITY_NAME\""

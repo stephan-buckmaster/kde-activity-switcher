@@ -57,6 +57,21 @@ Switch between existing activities. Automatically runs hook scripts to launch ap
 
 In interactive mode, shows a numbered list of all activities. You can also pass the activity name directly to switch immediately. If a hook script exists for that activity, it runs automatically.
 
+### delete-activity.sh
+
+Delete a KDE activity and its associated hook files.
+
+**Usage:**
+```bash
+./delete-activity.sh "Work"
+```
+
+This will:
+1. Look up the activity by name
+2. Prompt for confirmation
+3. Delete the activity using `kactivities-cli`
+4. Remove the hook file at `~/.config/kde-activities/hooks/Work.sh` if it exists
+
 ### setup-firefox-hook.sh
 
 Setup script that creates a hook for launching Firefox with a dedicated profile.
@@ -86,7 +101,7 @@ git clone <repo-url>
 cd kde-activity-switcher
 
 # Make scripts executable
-chmod +x create-activity.sh switch-activity.sh setup-firefox-hook.sh
+chmod +x create-activity.sh switch-activity.sh delete-activity.sh setup-firefox-hook.sh
 ```
 
 Optionally, add to your PATH or create symlinks in `~/bin/`
@@ -168,15 +183,18 @@ kactivities-cli --help
 
 ## Cleanup
 
-To remove hooks:
+To remove an activity and its hooks:
 ```bash
-# Remove a specific hook
+# Easiest way - removes both activity and hook
+./delete-activity.sh "Work"
+
+# Or manually remove just the hook
 rm ~/.config/kde-activities/hooks/Work.sh
 
 # Or remove all hooks
 rm -rf ~/.config/kde-activities/hooks/
 
-# To delete an activity (use UUID from --list-activities)
+# Or delete activity manually (use UUID from --list-activities)
 kactivities-cli --remove-activity <uuid>
 ```
 

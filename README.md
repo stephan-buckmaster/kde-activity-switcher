@@ -19,14 +19,18 @@ Creates a new KDE activity, optionally with a custom setup script.
 The `custom=` parameter accepts a path to any setup script. The script receives the activity name as an argument and can set up hooks or other configuration.
 
 ### switch-activity.sh
-Interactive script to switch between existing activities. Automatically runs hook scripts to launch apps when switching.
+Switch between existing activities. Automatically runs hook scripts to launch apps when switching.
 
 **Usage:**
 ```bash
+# Interactive mode - shows numbered list with quit option
 ./switch-activity.sh
+
+# Direct mode - switch by name
+./switch-activity.sh "Work"
 ```
 
-Shows a numbered list of all activities and lets you select which one to switch to. If a hook script exists for that activity, it will run automatically.
+In interactive mode, shows a numbered list of all activities with a quit option. You can also pass the activity name directly as an argument to switch immediately. If a hook script exists for that activity, it will run automatically.
 
 ### setup-firefox-hook.sh
 Setup script that creates a hook for launching Firefox with a dedicated profile.

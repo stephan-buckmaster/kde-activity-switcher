@@ -1,7 +1,6 @@
 #!/bin/bash
 # setup-firefox-hook.sh - Setup script for creating activity hooks with Firefox support
 # This script creates a hook that launches Firefox with a dedicated profile
-# Uses KDE's built-in hook system at ~/.local/share/kactivitymanagerd/activities/
 
 ACTIVITY_NAME="$1"
 
@@ -12,45 +11,32 @@ if [ -z "$ACTIVITY_NAME" ]; then
     echo "  $0 \"Work\""
     echo ""
     echo "This creates a hook that auto-launches Firefox with a dedicated profile"
-    echo "when you switch to the activity."
+    echo "when you switch to the activity using ./switch-activity.sh"
     exit 1
 fi
 
 # Convert activity name to lowercase for profile name
 PROFILE_NAME=$(echo "$ACTIVITY_NAME" | tr '[:upper:]' '[:lower:]')
 
-# Look up activity UUID from name
-echo "Looking up activity: $ACTIVITY_NAME"
+# Verify activity exists
 ACTIVITY_LIST=$(kactivities-cli --list-activities)
-ACTIVITY_ID=""
-
-while IFS= read -r line; do
-    # Parse line format: [STATUS] UUID Name (extra)
-    if echo "$line" | grep -q " $ACTIVITY_NAME "; then
-        ACTIVITY_ID=$(echo "$line" | awk '{print $2}')
-        break
-    fi
-done <<< "$ACTIVITY_LIST"
-
-if [ -z "$ACTIVITY_ID" ]; then
+if ! echo "$ACTIVITY_LIST" | grep -q " $ACTIVITY_NAME "; then
     echo "Error: Activity '$ACTIVITY_NAME' not found!"
     echo ""
     echo "Available activities:"
-    kactivities-cli --list-activities
+    echo "$ACTIVITY_LIST" | awk '{for(i=3;i<NF;i++) printf $i" "; print $(NF-1)}' | sed 's/ ($//'
     echo ""
     echo "Create it first with:"
-    echo "  kactivities-cli --create-activity \"$ACTIVITY_NAME\""
+    echo "  ./create-activity.sh \"$ACTIVITY_NAME\""
     exit 1
 fi
 
-echo "Found activity ID: $ACTIVITY_ID"
-
-# Create hooks directory using KDE's built-in location
-HOOK_DIR="$HOME/.local/share/kactivitymanagerd/activities/$ACTIVITY_ID"
+# Create hooks directory
+HOOK_DIR="$HOME/.config/kde-activities/hooks"
 mkdir -p "$HOOK_DIR"
 
-# Create the activated hook script
-HOOK_SCRIPT="$HOOK_DIR/activated"
+# Create the hook script
+HOOK_SCRIPT="$HOOK_DIR/${ACTIVITY_NAME}.sh"
 
 # Check if hook already exists
 if [ -f "$HOOK_SCRIPT" ]; then
@@ -70,7 +56,7 @@ echo "Creating hook script: $HOOK_SCRIPT"
 cat > "$HOOK_SCRIPT" << 'EOF'
 #!/bin/bash
 # Auto-generated hook script for activity: $ACTIVITY_NAME
-# This script runs automatically when switching to this activity via KDE
+# This script runs automatically when switching to this activity
 
 FIREFOX_PROFILE="$PROFILE_NAME"
 
@@ -120,7 +106,8 @@ echo ""
 echo "✓ Hook script created successfully at:"
 echo "  $HOOK_SCRIPT"
 echo ""
-echo "The hook will automatically run when you switch to '$ACTIVITY_NAME'."
+echo "The hook will automatically run when you switch to '$ACTIVITY_NAME'"
+echo "using ./switch-activity.sh"
 echo ""
 echo "NEXT STEP: Create the Firefox profile '$PROFILE_NAME'"
 echo ""
@@ -129,4 +116,4 @@ echo "  1. Run: firefox -ProfileManager -no-remote"
 echo "  2. Or just switch to the activity - the hook will prompt you!"
 echo ""
 echo "Switch to activity with:"
-echo "  kactivities-cli --set-current-activity \"$ACTIVITY_NAME\""
+echo "  ./switch-activity.sh \"$ACTIVITY_NAME\""

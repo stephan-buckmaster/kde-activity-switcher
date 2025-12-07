@@ -1,14 +1,14 @@
 #!/bin/bash
 # Example hook script for KDE Activities
 #
-# Location: ~/.local/share/kactivitymanagerd/activities/<activity-uuid>/activated
-# This script runs automatically when KDE switches to this activity
+# Location: ~/.config/kde-activities/hooks/<ActivityName>.sh
+# This script runs automatically when switch-activity.sh switches to this activity
 #
 # Use setup-firefox-hook.sh to create this automatically, or:
-# 1. Find your activity UUID: kactivities-cli --list-activities
-# 2. Create directory: mkdir -p ~/.local/share/kactivitymanagerd/activities/<uuid>
-# 3. Copy this file to: ~/.local/share/kactivitymanagerd/activities/<uuid>/activated
-# 4. Make it executable: chmod +x ~/.local/share/kactivitymanagerd/activities/<uuid>/activated
+# 1. Create directory: mkdir -p ~/.config/kde-activities/hooks
+# 2. Copy this file: cp example-hook.sh ~/.config/kde-activities/hooks/Work.sh
+# 3. Edit to customize: nano ~/.config/kde-activities/hooks/Work.sh
+# 4. Make it executable: chmod +x ~/.config/kde-activities/hooks/Work.sh
 
 ACTIVITY_NAME="Work"  # Your activity name (for reference only)
 FIREFOX_PROFILE="work"  # Your Firefox profile name

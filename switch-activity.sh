@@ -46,6 +46,22 @@ fi
 
 # Switch to selected activity
 SELECTED_ID=${ACTIVITY_MAP[$selection]}
+SELECTED_NAME=$(qdbus org.kde.ActivityManager /ActivityManager/Activities ActivityName "$SELECTED_ID")
+
 echo "Switching to activity..."
 qdbus org.kde.ActivityManager /ActivityManager/Activities SetCurrentActivity "$SELECTED_ID"
-echo "Switched to: $(qdbus org.kde.ActivityManager /ActivityManager/Activities ActivityName "$SELECTED_ID")"
+echo "Switched to: $SELECTED_NAME"
+
+# Check for and run hook script if it exists
+HOOK_DIR="$HOME/.config/kde-activities/hooks"
+HOOK_SCRIPT="$HOOK_DIR/${SELECTED_NAME}.sh"
+
+if [ -f "$HOOK_SCRIPT" ]; then
+    echo "Running hook script..."
+    if [ -x "$HOOK_SCRIPT" ]; then
+        "$HOOK_SCRIPT"
+    else
+        echo "Warning: Hook script exists but is not executable: $HOOK_SCRIPT"
+        echo "Run: chmod +x \"$HOOK_SCRIPT\""
+    fi
+fi

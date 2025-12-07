@@ -5,64 +5,108 @@ Simple scripts to manage KDE Plasma activities from the command line.
 ## Scripts
 
 ### create-activity.sh
-Creates a new KDE activity.
+Creates a new KDE activity, optionally with a custom setup script.
 
 **Usage:**
 ```bash
+# Create a basic activity
 ./create-activity.sh "Work"
-./create-activity.sh "Research"
+
+# Create an activity with Firefox auto-launch setup
+./create-activity.sh "Work" custom=./firefox-launcher.sh
 ```
 
+The `custom=` parameter accepts a path to any setup script. The script receives the activity name as an argument and can set up hooks or other configuration.
+
 ### switch-activity.sh
-Interactive script to switch between existing activities.
+Interactive script to switch between existing activities. Automatically runs hook scripts to launch apps when switching.
 
 **Usage:**
 ```bash
 ./switch-activity.sh
 ```
 
-Shows a numbered list of all activities and lets you select which one to switch to.
+Shows a numbered list of all activities and lets you select which one to switch to. If a hook script exists for that activity, it will run automatically.
+
+### firefox-launcher.sh
+Setup script that creates a hook for launching Firefox with a dedicated profile.
+
+**Usage:**
+```bash
+# Typically used with create-activity.sh
+./create-activity.sh "Work" custom=./firefox-launcher.sh
+
+# Can also be run standalone
+./firefox-launcher.sh "Work"
+```
+
+This creates a hook script that launches Firefox (with profile "work") and a terminal when switching to the activity.
 
 ## Installation
 
 1. Clone this repo
 2. Make scripts executable:
 ```bash
-chmod +x create-activity.sh switch-activity.sh
+chmod +x create-activity.sh switch-activity.sh firefox-launcher.sh
 ```
 
 3. Optionally, add to your PATH or create symlinks in `~/bin/`
 
-## Tips for Activity Isolation
+## Auto-launching Apps with Hook Scripts
 
-### Using Firefox with Activities
-Firefox works better than Chrome for activity isolation. Launch Firefox with separate profiles per activity:
+`switch-activity.sh` automatically runs hook scripts when switching to an activity. This lets you launch Firefox (with specific profiles), terminals, and other apps automatically.
 
+### Quick Setup with firefox-launcher.sh
+
+The easiest way to set up Firefox auto-launching:
+
+1. Create an activity with the Firefox setup script:
 ```bash
-firefox -P activity1 -no-remote &
+./create-activity.sh "Work" custom=./firefox-launcher.sh
 ```
 
-The `-no-remote` flag allows multiple Firefox instances to run simultaneously.
-
-Create profiles first:
+2. Create the Firefox profile when prompted:
 ```bash
 firefox -ProfileManager -no-remote
+# Create profile named "work" (lowercase of activity name)
 ```
 
-### Auto-launching Apps per Activity
-You can enhance the switch script to automatically launch Firefox and terminal for each activity by checking if they're already running:
-
+3. Switch to your activity:
 ```bash
-# Launch Firefox only if not already running with this profile
-if ! pgrep -f "firefox.*-P work" > /dev/null; then
-    firefox -P work -no-remote &
-fi
-
-# Launch terminal
-if ! pgrep konsole > /dev/null; then
-    konsole &
-fi
+./switch-activity.sh
+# Select "Work" - Firefox and terminal launch automatically!
 ```
+
+### Manual Hook Setup
+
+You can also create hooks manually for more control:
+
+1. Create the hooks directory:
+```bash
+mkdir -p ~/.config/kde-activities/hooks
+```
+
+2. Copy the example hook and customize it:
+```bash
+cp example-hook.sh ~/.config/kde-activities/hooks/Work.sh
+chmod +x ~/.config/kde-activities/hooks/Work.sh
+```
+
+3. Edit the hook script to match your needs
+
+### How It Works
+
+- Hook scripts are named after the activity: `<ActivityName>.sh`
+- The script runs automatically when you switch to that activity
+- Apps only launch if they're not already running
+- Each activity can have different apps/profiles
+
+### Why Firefox Works Better
+
+Firefox works better than Chrome for activity isolation because:
+- Firefox allows multiple instances with different profiles using `-P <profile> -no-remote`
+- Each profile's windows stay in their respective activity
+- Chrome prefers a single process managing all windows
 
 ## Requirements
 

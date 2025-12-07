@@ -52,6 +52,19 @@ mkdir -p "$HOOK_DIR"
 # Create the activated hook script
 HOOK_SCRIPT="$HOOK_DIR/activated"
 
+# Check if hook already exists
+if [ -f "$HOOK_SCRIPT" ]; then
+    echo "Error: Hook script already exists at:"
+    echo "  $HOOK_SCRIPT"
+    echo ""
+    echo "To replace it, first remove the existing hook:"
+    echo "  rm \"$HOOK_SCRIPT\""
+    echo ""
+    echo "Or to view the existing hook:"
+    echo "  cat \"$HOOK_SCRIPT\""
+    exit 1
+fi
+
 echo "Creating hook script: $HOOK_SCRIPT"
 
 cat > "$HOOK_SCRIPT" << 'EOF'

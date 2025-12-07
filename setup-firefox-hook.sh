@@ -1,5 +1,5 @@
 #!/bin/bash
-# firefox-launcher.sh - Setup script for creating activity hooks with Firefox support
+# setup-firefox-hook.sh - Setup script for creating activity hooks with Firefox support
 # This script creates a hook that launches Firefox with a dedicated profile
 
 ACTIVITY_NAME="$1"

@@ -13,7 +13,7 @@ Creates a new KDE activity, optionally with a custom setup script.
 ./create-activity.sh "Work"
 
 # Create an activity with Firefox auto-launch setup
-./create-activity.sh "Work" custom=./firefox-launcher.sh
+./create-activity.sh "Work" custom=./setup-firefox-hook.sh
 ```
 
 The `custom=` parameter accepts a path to any setup script. The script receives the activity name as an argument and can set up hooks or other configuration.
@@ -28,16 +28,16 @@ Interactive script to switch between existing activities. Automatically runs hoo
 
 Shows a numbered list of all activities and lets you select which one to switch to. If a hook script exists for that activity, it will run automatically.
 
-### firefox-launcher.sh
+### setup-firefox-hook.sh
 Setup script that creates a hook for launching Firefox with a dedicated profile.
 
 **Usage:**
 ```bash
 # Typically used with create-activity.sh
-./create-activity.sh "Work" custom=./firefox-launcher.sh
+./create-activity.sh "Work" custom=./setup-firefox-hook.sh
 
 # Can also be run standalone
-./firefox-launcher.sh "Work"
+./setup-firefox-hook.sh "Work"
 ```
 
 This creates a hook script that launches Firefox (with profile "work") and a terminal when switching to the activity.
@@ -47,7 +47,7 @@ This creates a hook script that launches Firefox (with profile "work") and a ter
 1. Clone this repo
 2. Make scripts executable:
 ```bash
-chmod +x create-activity.sh switch-activity.sh firefox-launcher.sh
+chmod +x create-activity.sh switch-activity.sh setup-firefox-hook.sh
 ```
 
 3. Optionally, add to your PATH or create symlinks in `~/bin/`
@@ -56,13 +56,13 @@ chmod +x create-activity.sh switch-activity.sh firefox-launcher.sh
 
 `switch-activity.sh` automatically runs hook scripts when switching to an activity. This lets you launch Firefox (with specific profiles), terminals, and other apps automatically.
 
-### Quick Setup with firefox-launcher.sh
+### Quick Setup with setup-firefox-hook.sh
 
 The easiest way to set up Firefox auto-launching:
 
 1. Create an activity with the Firefox setup script:
 ```bash
-./create-activity.sh "Work" custom=./firefox-launcher.sh
+./create-activity.sh "Work" custom=./setup-firefox-hook.sh
 ```
 
 2. Create the Firefox profile when prompted:

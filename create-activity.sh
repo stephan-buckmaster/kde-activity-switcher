@@ -9,7 +9,7 @@ if [ -z "$ACTIVITY_NAME" ]; then
     echo ""
     echo "Examples:"
     echo "  $0 \"Work\""
-    echo "  $0 \"Work\" custom=./firefox-launcher.sh"
+    echo "  $0 \"Work\" custom=./setup-firefox-hook.sh"
     exit 1
 fi
 
